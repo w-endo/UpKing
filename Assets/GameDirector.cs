@@ -25,10 +25,19 @@ public class GameDirector : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //Žc‚èŽžŠÔ•\Ž¦
         timeText.text = "" + (int)timeLeft / 60 + ":" + (int)timeLeft % 60;
-
-
         timeLeft -= Time.deltaTime;
+
+
+        if(timeLeft <= 0)
+        {
+            if (state == GameState.TAKE)
+            {
+                //‰¤Š¥‚ðÁ‚·
+                Destroy(GameObject.FindWithTag("Crown"));
+            }
+        }
     }
 
 

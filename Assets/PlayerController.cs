@@ -29,6 +29,9 @@ public class PlayerController : MonoBehaviour
     public GameObject bulletPrefab;
     public GameObject beamPrefab;
 
+
+    public int ID = 1;
+
     bool isKing = false;
 
     float isMove = 0;
@@ -67,9 +70,9 @@ public class PlayerController : MonoBehaviour
         if (isGrounded && velocity.y < 0) velocity.y = -2f;
 
 
-        float moveX = Input.GetAxisRaw("Horizontal");
-        float moveY = Input.GetAxisRaw("Vertical");
-        bool isDashing = Input.GetButton("Dash") || Input.GetKey(KeyCode.LeftShift);
+        float moveX = Input.GetAxisRaw("Horizontal" + ID);
+        float moveY = Input.GetAxisRaw("Vertical" + ID);
+        bool isDashing = Input.GetButton("Dash" + ID) || Input.GetKey(KeyCode.LeftShift);
 
 
         //梯子を上ってる
@@ -135,7 +138,7 @@ public class PlayerController : MonoBehaviour
             float currentSpeed = isDashing ? dashSpeed : walkSpeed;
             Vector3 horizontalMove = new Vector3(moveX, 0, 0);
 
-            if (Input.GetButtonDown("Jump") && isGrounded)
+            if (Input.GetButtonDown("Jump" + ID) && isGrounded)
             {
                 velocity.y = Mathf.Sqrt(jumpHeight * -2.0f * gravity);
             }
@@ -152,7 +155,7 @@ public class PlayerController : MonoBehaviour
         }
 
         //梯子設置
-        if (Input.GetButtonDown("Setup") && ladderCount > 0)
+        if (Input.GetButtonDown("Setup" + ID) && ladderCount > 0 && isGrounded)
         {
             ladderCount--;
             GameObject ladder = Instantiate(ladderPrefab);
@@ -181,7 +184,7 @@ public class PlayerController : MonoBehaviour
 
 
         //攻撃
-        if (Input.GetButtonDown("Fire1"))
+        if (Input.GetButtonDown("Fire" + ID))
         {
             //王様の時
             if (isKing)
@@ -234,6 +237,9 @@ public class PlayerController : MonoBehaviour
             other.transform.parent = transform;
             other.transform.localPosition = new Vector3(0, 1.0f, 0);
             isKing = true;
+
+            //王様ターンへ移行
+            GameObject.Find("GameDirector").GetComponent<GameDirector>().ChangeState();
         }
 
 
