@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEngine.InputSystem.XR;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(CharacterController))]
 public class PlayerController : MonoBehaviour
@@ -18,8 +18,11 @@ public class PlayerController : MonoBehaviour
     public bool isLadderRoot = false;
     float ladderRootY = 0f;
 
-    public int ladderCount = 0; // 接触している梯子の数
-    public bool isOnLadder => ladderCount > 0; // プロパティにすると便利です
+
+
+
+    private List<Collider> activeLadders = new List<Collider>();
+    public bool isOnLadder => activeLadders.Count > 0;
 
     void Start()
     {
@@ -30,6 +33,14 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        // 【重要】ワープや消滅対策：無効になったコライダーをリストから削除
+        if (activeLadders.Count > 0)
+        {
+            activeLadders.RemoveAll(l => l == null || !l.enabled || !l.gameObject.activeInHierarchy);
+        }
+
+
+
         isGrounded = controller.isGrounded;
         if (isGrounded && velocity.y < 0) velocity.y = -2f;
 
@@ -51,7 +62,7 @@ public class PlayerController : MonoBehaviour
                 controller.enabled = false;
                 transform.position = pos;
                 controller.enabled = true;
-                //ladderCount--;
+
 
                 Debug.Log("Stop Climbing");
             }
@@ -62,15 +73,16 @@ public class PlayerController : MonoBehaviour
             controller.Move(velocity * Time.deltaTime); 
 
 
-            if(moveY < 0 && isLadderRoot && transform.position.y < ladderRootY)
+            if(moveY < 0 && isLadderRoot && transform.position.y <= ladderRootY)
             {
                 isClimbing = false;
                 Vector3 pos = transform.position;
                 pos.z = 0;
+                pos.y = ladderRootY;
                 controller.enabled = false;
                 transform.position = pos;
                 controller.enabled = true;
-                ladderCount--;
+
 
                 Debug.Log("Stop Climbing at Ladder Root");
             }
@@ -82,7 +94,7 @@ public class PlayerController : MonoBehaviour
         {   
            if(isOnLadder)
             {
-                if(Mathf.Abs( moveY) > 0.1)
+                if((isLadderRoot ==true && moveY > 0.2) || (isLadderRoot == false && moveY < -0.2))
                 {
                     Vector3 pos = transform.position;
                     pos.z = -1;
@@ -91,7 +103,6 @@ public class PlayerController : MonoBehaviour
                     transform.position = pos;
                     controller.enabled = true;
                     isClimbing = true;
-                    ladderCount--;
 
                     Debug.Log("Start Climbing");
                 }
@@ -117,7 +128,11 @@ public class PlayerController : MonoBehaviour
     {
         if (other.CompareTag("Ladder") || other.CompareTag("LadderRoot"))
         {
-            ladderCount++;
+            if (!activeLadders.Contains(other))
+            {
+                activeLadders.Add(other);
+            }
+
             if (other.CompareTag("LadderRoot"))
             {
                 isLadderRoot = true;
@@ -132,16 +147,8 @@ public class PlayerController : MonoBehaviour
     {
         if (other.CompareTag("Ladder") || other.CompareTag("LadderRoot"))
         {
-            ladderCount--;
+            activeLadders.Remove(other);
 
-            // 負の数にならないよう念のためクランプ（予期せぬ挙動対策）
-            if (ladderCount < 0) ladderCount = 0;
-
-            // 全ての梯子から離れた時のみ、速度をリセット
-            if (ladderCount == 0)
-            {
-                velocity.y = 0;
-            }
 
             if (other.CompareTag("LadderRoot"))
             {
