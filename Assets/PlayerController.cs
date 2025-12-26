@@ -242,6 +242,13 @@ public class PlayerController : MonoBehaviour
             GameObject.Find("GameDirector").GetComponent<GameDirector>().ChangeState();
         }
 
+        else if (other.CompareTag("Beam"))
+        {
+
+            GameObject.Find("GameDirector").GetComponent<GameDirector>().Death();
+            Destroy(gameObject);
+        }
+
 
     }
 

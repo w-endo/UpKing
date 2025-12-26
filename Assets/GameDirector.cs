@@ -1,11 +1,15 @@
 using System.Data;
 using TMPro;
+using UnityEngine.SceneManagement;
 using UnityEngine;
 
 public class GameDirector : MonoBehaviour
 {
     float timeLeft = 180f;
     public TextMeshProUGUI timeText;
+
+    int plaerCount = 0;
+    public int winner = -1;
 
 
     public enum GameState
@@ -19,7 +23,11 @@ public class GameDirector : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+
+        DontDestroyOnLoad(gameObject);
+
+        //ÉvÉåÉCÉÑÅ[ÇÃêî
+        plaerCount = GameObject.FindGameObjectsWithTag("Player").Length;
     }
 
     // Update is called once per frame
@@ -46,5 +54,17 @@ public class GameDirector : MonoBehaviour
     {
         timeLeft = 120;
         state = GameState.KING;
+    }
+
+
+    public void Death()
+    {
+        plaerCount--;
+        if(plaerCount <= 1)
+        {
+            winner = GameObject.FindWithTag("Player").GetComponent<PlayerController>().ID;
+
+            SceneManager.LoadScene("ResultScene");
+        }
     }
 }
