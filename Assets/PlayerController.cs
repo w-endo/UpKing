@@ -27,6 +27,11 @@ public class PlayerController : MonoBehaviour
     public GameObject ladderPrefab;
 
     public GameObject bulletPrefab;
+    public GameObject beamPrefab;
+
+    bool isKing = false;
+
+    float isMove = 0;
 
 
 
@@ -43,6 +48,13 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        isMove -= Time.deltaTime;
+        if (isMove > 0)
+        {
+            return;
+        }
+
+
         // 【重要】ワープや消滅対策：無効になったコライダーをリストから削除
         if (activeLadders.Count > 0)
         {
@@ -171,10 +183,30 @@ public class PlayerController : MonoBehaviour
         //攻撃
         if (Input.GetButtonDown("Fire1"))
         {
-            GameObject bullet = Instantiate(bulletPrefab, transform.position + Vector3.right * direction * 0.3f, Quaternion.identity);
-            bullet.GetComponent<Bullet>().direction = direction;
+            //王様の時
+            if (isKing)
+            {
+                Invoke("Beam", 1.0f);
+
+                //ビームを撃ったら４秒間は行動不能
+                isMove = 3.0f;
+            }
+
+            //ふつうのプレイヤー
+            else
+            {
+                GameObject bullet = Instantiate(bulletPrefab, transform.position + Vector3.right * direction * 0.3f, Quaternion.identity);
+                bullet.GetComponent<Bullet>().direction = direction;
+            }
         }
 
+    }
+
+    void Beam()
+    {
+        //ビーム発射
+        GameObject beam = Instantiate(beamPrefab, transform.position, Quaternion.identity);
+        Destroy(beam, 3.0f);
     }
 
     private void OnTriggerEnter(Collider other)
@@ -196,6 +228,12 @@ public class PlayerController : MonoBehaviour
         {
             ladderCount++;
             Destroy(other.gameObject);
+        }
+        else if (other.gameObject.name=="Crown")
+        {
+            other.transform.parent = transform;
+            other.transform.localPosition = new Vector3(0, 1.0f, 0);
+            isKing = true;
         }
 
 
