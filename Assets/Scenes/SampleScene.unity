@@ -891,6 +891,7 @@ MonoBehaviour:
   gravity: -9.81
   isClimbing: 0
   isLadderRoot: 0
+  ladderPrefab: {fileID: 7291312330904826584, guid: cff927180d6aff449b59777fe63629ed, type: 3}
 --- !u!54 &681892760
 Rigidbody:
   m_ObjectHideFlags: 0

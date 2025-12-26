@@ -16,7 +16,11 @@ public class PlayerController : MonoBehaviour
     private bool isGrounded;
     public bool isClimbing = false;
     public bool isLadderRoot = false;
-    float ladderRootY = 0f;
+    //float ladderRootY = 0f;
+    GameObject ladderRootObject = null;
+
+
+    public GameObject ladderPrefab;
 
 
 
@@ -73,12 +77,12 @@ public class PlayerController : MonoBehaviour
             controller.Move(velocity * Time.deltaTime); 
 
 
-            if(moveY < 0 && isLadderRoot && transform.position.y <= ladderRootY)
+            if(moveY < 0 && isLadderRoot && transform.position.y <= ladderRootObject.transform.position.y)
             {
                 isClimbing = false;
                 Vector3 pos = transform.position;
                 pos.z = 0;
-                pos.y = ladderRootY;
+                pos.y = ladderRootObject.transform.position.y;
                 controller.enabled = false;
                 transform.position = pos;
                 controller.enabled = true;
@@ -123,6 +127,25 @@ public class PlayerController : MonoBehaviour
             controller.Move(velocity * Time.deltaTime);
         }
 
+        //’òŽqÝ’u
+        if(Input.GetButtonDown("Setup"))
+        {
+            GameObject ladder = Instantiate(ladderPrefab);
+
+            //’òŽq‚ÉG‚ê‚Ä‚é
+            if (isLadderRoot)
+            {
+                ladder.transform.parent = ladderRootObject.transform;
+                ladder.transform.localPosition = new Vector3(0, ladderRootObject.transform.childCount-1, 0);
+            }
+            else
+            {
+                float y = (int)(transform.position.y - 0.3f) + 0.5f;
+                ladder.transform.position = new Vector3(transform.position.x, y, 0);
+                ladder.tag = "LadderRoot";
+            }
+        }
+
     }
     private void OnTriggerEnter(Collider other)
     {
@@ -136,7 +159,7 @@ public class PlayerController : MonoBehaviour
             if (other.CompareTag("LadderRoot"))
             {
                 isLadderRoot = true;
-                ladderRootY = other.transform.position.y;
+                ladderRootObject = other.gameObject;
             }
         }
 

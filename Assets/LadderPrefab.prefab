@@ -97,7 +97,7 @@ GameObject:
   - component: {fileID: 2181319237216081833}
   - component: {fileID: 1821634237431355506}
   m_Layer: 0
-  m_Name: Ladder (1)
+  m_Name: LadderPrefab
   m_TagString: Ladder
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
