@@ -14,13 +14,19 @@ public class PlayerController : MonoBehaviour
     private CharacterController controller;
     private Vector3 velocity;
     private bool isGrounded;
-    public bool isClimbing = false;
-    public bool isLadderRoot = false;
-    //float ladderRootY = 0f;
+    bool isClimbing = false;
+    bool isLadderRoot = false;
+
+    int ladderCount = 0;
+
     GameObject ladderRootObject = null;
+
+    int direction = 1; // 向き
 
 
     public GameObject ladderPrefab;
+
+    public GameObject bulletPrefab;
 
 
 
@@ -58,7 +64,7 @@ public class PlayerController : MonoBehaviour
         if (isClimbing)
         {
             //梯子から離れた
-            if(isOnLadder == false)
+            if (isOnLadder == false)
             {
                 isClimbing = false;
                 Vector3 pos = transform.position;
@@ -74,10 +80,10 @@ public class PlayerController : MonoBehaviour
             // はしご中の垂直移動
             velocity.y = moveY * ladderSpeed;
 
-            controller.Move(velocity * Time.deltaTime); 
+            controller.Move(velocity * Time.deltaTime);
 
 
-            if(moveY < 0 && isLadderRoot && transform.position.y <= ladderRootObject.transform.position.y)
+            if (moveY < 0 && isLadderRoot && transform.position.y <= ladderRootObject.transform.position.y)
             {
                 isClimbing = false;
                 Vector3 pos = transform.position;
@@ -95,10 +101,10 @@ public class PlayerController : MonoBehaviour
 
         //地面の上
         else
-        {   
-           if(isOnLadder)
+        {
+            if (isOnLadder)
             {
-                if((isLadderRoot ==true && moveY > 0.2) || (isLadderRoot == false && moveY < -0.2))
+                if ((isLadderRoot == true && moveY > 0.2) || (isLadderRoot == false && moveY < -0.2))
                 {
                     Vector3 pos = transform.position;
                     pos.z = -1;
@@ -125,18 +131,33 @@ public class PlayerController : MonoBehaviour
 
             controller.Move(horizontalMove.normalized * currentSpeed * Time.deltaTime);
             controller.Move(velocity * Time.deltaTime);
+
+            //向きの変更
+            if (moveX != 0)
+            {
+                direction = moveX > 0 ? 1 : -1;
+            }
         }
 
         //梯子設置
-        if(Input.GetButtonDown("Setup"))
+        if (Input.GetButtonDown("Setup") && ladderCount > 0)
         {
+            ladderCount--;
             GameObject ladder = Instantiate(ladderPrefab);
 
             //梯子に触れてる
             if (isLadderRoot)
             {
-                ladder.transform.parent = ladderRootObject.transform;
-                ladder.transform.localPosition = new Vector3(0, ladderRootObject.transform.childCount-1, 0);
+                GameObject parent = ladderRootObject;
+
+                while(parent.transform.childCount > 1)
+                {
+                    parent = parent.transform.GetChild(1).gameObject;
+                }
+
+
+                ladder.transform.parent = parent.transform;
+                ladder.transform.localPosition = new Vector3(0, 1, 0);
             }
             else
             {
@@ -146,7 +167,16 @@ public class PlayerController : MonoBehaviour
             }
         }
 
+
+        //攻撃
+        if (Input.GetButtonDown("Fire1"))
+        {
+            GameObject bullet = Instantiate(bulletPrefab, transform.position + Vector3.right * direction * 0.3f, Quaternion.identity);
+            bullet.GetComponent<Bullet>().direction = direction;
+        }
+
     }
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Ladder") || other.CompareTag("LadderRoot"))
@@ -161,6 +191,11 @@ public class PlayerController : MonoBehaviour
                 isLadderRoot = true;
                 ladderRootObject = other.gameObject;
             }
+        }
+        else if (other.CompareTag("LadderItem"))
+        {
+            ladderCount++;
+            Destroy(other.gameObject);
         }
 
 

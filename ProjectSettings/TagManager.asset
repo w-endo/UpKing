@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Ladder
   - LadderRoot
+  - LadderItem
   layers:
   - Default
   - TransparentFX
